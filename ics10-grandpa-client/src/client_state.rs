@@ -532,7 +532,7 @@ fn verify_membership(
     // TODO(we need prefix)??
     // let merkle_path = apply_prefix(prefix, vec![path.into().to_string()]);
 
-    let (key, storage_name) = match Path::from(path) {
+    let (key, storage_name) = match path {
         Path::ClientType(_) => unimplemented!(),
         Path::ClientState(value) => (value.to_string().as_bytes().to_vec(), "ClientStates"),
         Path::ClientConsensusState(value) => {
@@ -571,7 +571,7 @@ fn verify_non_membership(
     // TODO(we need prefix)??
     // let merkle_path = apply_prefix(prefix, vec![path.into().to_string()]);
 
-    let (key, storage_name) = match Path::from(path) {
+    let (key, storage_name) = match path {
         Path::ClientType(_) => unimplemented!(),
         Path::ClientState(value) => (value.to_string().as_bytes().to_vec(), "ClientStates"),
         Path::ClientConsensusState(value) => {
@@ -621,7 +621,7 @@ fn get_storage_via_proof(
     let merkel_proof = merkel_proof.proofs[0]
         .proof
         .clone()
-        .ok_or(Ics02Error::client_specific("empty_proof".to_string()))?;
+        .ok_or_else(|| Ics02Error::client_specific("empty_proof".to_string()))?;
     let storage_proof = match merkel_proof {
         Exist(exist_proof) => {
             let proof_str = String::from_utf8(exist_proof.value)
@@ -643,7 +643,7 @@ fn get_storage_via_proof(
         &storage_keys,
     )
     .map_err(|e| Ics02Error::client_specific(e.to_string()))?
-    .ok_or(Ics02Error::client_specific("empty_proof".to_string()))?;
+    .ok_or_else(|| Ics02Error::client_specific("empty_proof".to_string()))?;
 
     let storage_result = <Vec<u8> as Decode>::decode(&mut &storage_result[..])
         .map_err(|e| Ics02Error::client_specific(e.to_string()))?;

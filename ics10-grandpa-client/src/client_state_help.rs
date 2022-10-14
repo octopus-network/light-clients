@@ -51,7 +51,7 @@ impl From<BeefyCommitment> for Commitment {
     fn from(value: BeefyCommitment) -> Self {
         Self {
             block_number: value.block_number,
-            payload: value.payload.into(),
+            payload: value.payload,
             validator_set_id: value.validator_set_id,
         }
     }
@@ -60,7 +60,7 @@ impl From<BeefyCommitment> for Commitment {
 impl From<Commitment> for BeefyCommitment {
     fn from(value: Commitment) -> Self {
         Self {
-            payload: value.payload.into(),
+            payload: value.payload,
             block_number: value.block_number,
             validator_set_id: value.validator_set_id,
         }
@@ -83,7 +83,7 @@ impl From<Commitment> for RawCommitment {
             payload: value
                 .payload
                 .get_raw(&MMR_ROOT_ID)
-                .map(|value| value.clone())
+                .cloned()
                 .unwrap_or_default(),
             validator_set_id: value.validator_set_id,
         }
@@ -177,7 +177,7 @@ impl From<mmr::MmrLeaf> for MmrLeaf {
                 parent_header_hash: Vec::from(value.parent_number_and_hash.1),
             },
             beefy_next_authority_set: ValidatorSet::from(value.beefy_next_authority_set),
-            leaf_extra: Vec::from(value.leaf_extra),
+            leaf_extra: value.leaf_extra,
         }
     }
 }
@@ -281,13 +281,7 @@ impl From<commitment::SignedCommitment> for SignedCommitment {
             signatures: value
                 .signatures
                 .into_iter()
-                .map(|value| {
-                    if value.is_none() {
-                        None
-                    } else {
-                        Some(Signature::from(value.unwrap()))
-                    }
-                }) // todo unwrap , cannot remove because map
+                .map(|value| value.map(Signature::from)) // todo unwrap , cannot remove because map
                 .collect(),
         }
     }
@@ -302,13 +296,7 @@ impl TryFrom<SignedCommitment> for commitment::SignedCommitment {
             signatures: value
                 .signatures
                 .into_iter()
-                .map(|value| {
-                    if value.is_none() {
-                        None
-                    } else {
-                        Some(value.unwrap().try_into().unwrap())
-                    }
-                }) // todo unwrap , cannot remove because map
+                .map(|value| value.map(|inner_value| inner_value.try_into().unwrap())) // todo unwrap , cannot remove because map
                 .collect(),
         })
     }
@@ -344,13 +332,13 @@ impl TryFrom<SignedCommitment> for RawSignedCommitment {
                 .signatures
                 .into_iter()
                 .map(|value| {
-                    if value.is_none() {
+                    if let Some(inner_value) = value {
                         InnerSignature {
-                            inner_signature: None,
+                            inner_signature: Some(inner_value.into()),
                         }
                     } else {
                         InnerSignature {
-                            inner_signature: Some(value.unwrap().into()),
+                            inner_signature: None,
                         }
                     }
                 })

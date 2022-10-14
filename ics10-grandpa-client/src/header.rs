@@ -103,7 +103,7 @@ impl TryFrom<RawHeader> for Header {
                 .ok_or_else(Error::empty_block_header)?
                 .into(),
             mmr_root: raw.mmr_root.ok_or_else(Error::empty_mmr_root)?.try_into()?,
-            timestamp: timestamp,
+            timestamp,
         })
     }
 }

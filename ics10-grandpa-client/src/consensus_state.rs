@@ -58,7 +58,7 @@ impl ibc::core::ics02_client::consensus_state::ConsensusState for ConsensusState
 
     /// The timestamp of the consensus state
     fn timestamp(&self) -> Timestamp {
-        self.timestamp.clone().into()
+        self.timestamp.into()
     }
 }
 
