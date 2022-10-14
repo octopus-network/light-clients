@@ -24,6 +24,20 @@ use super::client_state_help::ValidatorSet;
 use crate::consensus_state::ConsensusState as GpConsensusState;
 use crate::error::Error;
 use crate::header::Header;
+use crate::state_machine::read_proof_check;
+use beefy_light_client::{
+    commitment::{self, known_payload_ids::MMR_ROOT_ID},
+    header, mmr,
+};
+use codec::{Decode, Encode};
+use frame_support::{
+    storage::{
+        storage_prefix,
+        types::{EncodeLikeTuple, KeyGenerator, TupleToEncodedIter},
+        Key,
+    },
+    Blake2_128Concat, StorageHasher,
+};
 use ibc::core::ics02_client::client_state::{
     ClientState as Ics2ClientState, UpdatedState, UpgradeOptions as CoreUpgradeOptions,
 };
@@ -40,26 +54,12 @@ use ibc_proto::google::protobuf::Any;
 use ibc_proto::ibc::core::client::v1::Height as RawHeight;
 use ibc_proto::ibc::core::commitment::v1::MerkleProof as RawMerkleProof;
 use ibc_proto::ibc::lightclients::tendermint::v1::ClientState as RawTmClientState;
+use ibc_proto::ics23::commitment_proof::Proof::Exist;
 use ibc_proto::protobuf::Protobuf;
 use prost::Message;
 use serde::{Deserialize, Serialize};
-use beefy_light_client::{
-    commitment::{self, known_payload_ids::MMR_ROOT_ID},
-    header, mmr,
-};
-use codec::{Decode, Encode};
-use sp_trie::StorageProof;
-use crate::state_machine::read_proof_check;
-use ibc_proto::ics23::commitment_proof::Proof::Exist;
-use frame_support::{
-    storage::{
-        storage_prefix,
-        types::{EncodeLikeTuple, KeyGenerator, TupleToEncodedIter},
-        Key,
-    },
-    Blake2_128Concat, StorageHasher,
-};
 use sp_runtime::traits::BlakeTwo256;
+use sp_trie::StorageProof;
 
 pub const GRANDPA_CLIENT_STATE_TYPE_URL: &str = "/ibc.lightclients.grandpa.v1.ClientState";
 
@@ -129,7 +129,7 @@ impl ibc::core::ics02_client::client_state::ClientState for ClientState {
 
     /// Type of client associated with this state (eg. Tendermint)
     fn client_type(&self) -> ClientType {
-        ClientType::Grandpa        
+        ClientType::Grandpa
     }
 
     /// Latest height the client was updated to
@@ -206,7 +206,7 @@ impl ibc::core::ics02_client::client_state::ClientState for ClientState {
         consensus_height: Height,
         expected_consensus_state: &dyn ConsensusState,
     ) -> Result<(), Ics02Error> {
-       // todo(davirian)
+        // todo(davirian)
         // client_state.verify_height(height)?;
 
         // TODO(davirian)
@@ -294,7 +294,7 @@ impl ibc::core::ics02_client::client_state::ClientState for ClientState {
         client_id: &ClientId,
         expected_client_state: Any,
     ) -> Result<(), Ics02Error> {
-       // todo(davirian)
+        // todo(davirian)
         // client_state.verify_height(height)?;
         //         , 64, 76, 195, 203, 235, 162, 185, 174, 5, 104, 95, 8, 242, 131, 232, 130, 12, 246, 179, 105, 215, 10, 187, 160, 190, 136, 229, 32, 9, 0, 0, 0, 0, 0, 0, 0, 104, 95, 13, 175, 218, 65, 33, 225, 150, 51, 237, 160, 123, 37, 248, 10, 100, 93, 32, 1, 0, 0, 0, 0, 0, 0, 0, 128, 228, 240, 196, 227, 209, 249, 82, 83, 199, 213, 188, 111, 8, 93, 101, 175, 2, 8, 238, 176, 175, 150, 244, 255, 72, 51, 187, 41, 185, 202, 96, 126, 128, 27, 42, 223, 222, 178, 181, 216, 105, 60, 141, 13, 16, 87, 54, 243, 71, 131, 150, 141, 242, 196, 131, 155, 56, 7, 183, 90, 114, 187, 62, 80, 114, 128, 157, 230, 178, 49, 94, 186, 219, 185, 144, 22, 221, 142, 192, 190, 189, 76, 15, 250, 93, 182, 207, 240, 51, 189, 211, 119, 211, 234, 255, 5, 240, 15]] }
         // 2022-08-22 13:22:48.092 TRACE tokio-runtime-worker ibc-rs: in client_def -- get_storage_via_proof, _storage_keys = [101, 204, 242, 3, 105, 192, 221, 218, 216, 45, 16, 3, 82, 58, 196, 142, 83, 132, 145, 119, 250, 48, 85, 212, 116, 56, 227, 154, 243, 42, 226, 177, 252, 130, 244, 54, 210, 6, 77, 152, 118, 243, 115, 152, 48, 167, 27, 139, 128, 99, 108, 105, 101, 110, 116, 115, 47, 49, 48, 45, 103, 114, 97, 110, 100, 112, 97, 45, 48, 47, 99, 108, 105, 101, 110, 116, 83, 116, 97, 116, 101]
@@ -312,8 +312,8 @@ impl ibc::core::ics02_client::client_state::ClientState for ClientState {
         // todo(davirian)
         // let path = ClientStatePath(client_id.clone());
         // let value = expected_client_state
-            // .encode_vec()
-            // .map_err(Ics02Error::invalid_any_client_state)?;
+        // .encode_vec()
+        // .map_err(Ics02Error::invalid_any_client_state)?;
 
         // verify_membership(prefix, proof, root, Path::ClientState(path), value)
         todo!()
@@ -362,7 +362,7 @@ impl ibc::core::ics02_client::client_state::ClientState for ClientState {
         sequence: Sequence,
         ack: AcknowledgementCommitment,
     ) -> Result<(), Ics02Error> {
-       // TODO(davirian)
+        // TODO(davirian)
         // client_state.verify_height(height)?;
         // verify_delay_passed(ctx, height, connection_end)?;
 
@@ -393,7 +393,7 @@ impl ibc::core::ics02_client::client_state::ClientState for ClientState {
         channel_id: &ChannelId,
         sequence: Sequence,
     ) -> Result<(), Ics02Error> {
-       // todo(davirian)
+        // todo(davirian)
         // client_state.verify_height(height)?;
         // verify_delay_passed(ctx, height, connection_end)?;
 
@@ -423,7 +423,7 @@ impl ibc::core::ics02_client::client_state::ClientState for ClientState {
         channel_id: &ChannelId,
         sequence: Sequence,
     ) -> Result<(), Ics02Error> {
-            // todo(davirain) we need add
+        // todo(davirain) we need add
         // client_state.verify_height(height)?;
         // verify_delay_passed(ctx, height, connection_end)?;
 
@@ -522,8 +522,6 @@ impl From<ClientState> for Any {
     }
 }
 
-
-
 fn verify_membership(
     prefix: &CommitmentPrefix,
     proof: &CommitmentProofBytes,
@@ -556,7 +554,9 @@ fn verify_membership(
     let storage_result = get_storage_via_proof(root, proof, key, storage_name)?;
 
     if storage_result != value {
-        Err(Ics02Error::client_specific("verify_membership_error".to_string()))
+        Err(Ics02Error::client_specific(
+            "verify_membership_error".to_string(),
+        ))
     } else {
         Ok(())
     }
@@ -596,7 +596,9 @@ fn verify_non_membership(
     if storage_result.is_err() {
         Ok(())
     } else {
-        Err(Ics02Error::client_specific("verify_no_membership_error".to_string()))
+        Err(Ics02Error::client_specific(
+            "verify_no_membership_error".to_string(),
+        ))
     }
 }
 
@@ -607,7 +609,6 @@ fn get_storage_via_proof(
     keys: Vec<u8>,
     storage_name: &str,
 ) -> Result<Vec<u8>, Ics02Error> {
-   
     #[derive(Debug, PartialEq, Serialize, Deserialize)]
     #[serde(rename_all = "camelCase")]
     pub struct ReadProofU8 {
@@ -615,18 +616,18 @@ fn get_storage_via_proof(
         pub proof: Vec<Vec<u8>>,
     }
 
-    let merkel_proof =
-        RawMerkleProof::try_from(proof.clone()).map_err(|e| Ics02Error::client_specific(e.to_string()))?;
+    let merkel_proof = RawMerkleProof::try_from(proof.clone())
+        .map_err(|e| Ics02Error::client_specific(e.to_string()))?;
     let merkel_proof = merkel_proof.proofs[0]
         .proof
         .clone()
         .ok_or(Ics02Error::client_specific("empty_proof".to_string()))?;
     let storage_proof = match merkel_proof {
         Exist(exist_proof) => {
-            let proof_str =
-                String::from_utf8(exist_proof.value).map_err(|e|Ics02Error::client_specific(e.to_string()))?;
-            let storage_proof: ReadProofU8 =
-                serde_json::from_str(&proof_str).map_err(|e|Ics02Error::client_specific(e.to_string()))?;
+            let proof_str = String::from_utf8(exist_proof.value)
+                .map_err(|e| Ics02Error::client_specific(e.to_string()))?;
+            let storage_proof: ReadProofU8 = serde_json::from_str(&proof_str)
+                .map_err(|e| Ics02Error::client_specific(e.to_string()))?;
             storage_proof
         }
         _ => unimplemented!(),
@@ -645,7 +646,7 @@ fn get_storage_via_proof(
     .ok_or(Ics02Error::client_specific("empty_proof".to_string()))?;
 
     let storage_result = <Vec<u8> as Decode>::decode(&mut &storage_result[..])
-        .map_err(|e|Ics02Error::client_specific(e.to_string()))?;
+        .map_err(|e| Ics02Error::client_specific(e.to_string()))?;
 
     Ok(storage_result)
 }
@@ -680,28 +681,34 @@ fn verify_header(
     mmr_leaf_proof: Vec<u8>,
 ) -> Result<(), Ics02Error> {
     let block_number = block_header.block_number as u64;
-    let mmr_leaf: Vec<u8> =
-        Decode::decode(&mut &mmr_leaf[..]).map_err(|e|Ics02Error::client_specific(e.to_string()))?;
-    
+    let mmr_leaf: Vec<u8> = Decode::decode(&mut &mmr_leaf[..])
+        .map_err(|e| Ics02Error::client_specific(e.to_string()))?;
+
     let mmr_leaf: mmr::MmrLeaf =
-    Decode::decode(&mut &*mmr_leaf).map_err(|e|Ics02Error::client_specific(e.to_string()))?;
+        Decode::decode(&mut &*mmr_leaf).map_err(|e| Ics02Error::client_specific(e.to_string()))?;
 
     // check mmr leaf
     if mmr_leaf.parent_number_and_hash.1.is_empty() {
-        return Err(Ics02Error::client_specific("empty mmr leaf parent hash mmr root".to_string()));
+        return Err(Ics02Error::client_specific(
+            "empty mmr leaf parent hash mmr root".to_string(),
+        ));
     }
 
     // decode mmr leaf proof
     let mmr_leaf_proof = beefy_light_client::mmr::MmrLeafProof::decode(&mut &mmr_leaf_proof[..])
         .map_err(|e| Ics02Error::client_specific(e.to_string()))?;
-   
+
     if block_number > mmr_leaf_proof.leaf_count {
-        return Err(Ics02Error::client_specific("invalid mmr leaf proof".to_string()));
+        return Err(Ics02Error::client_specific(
+            "invalid mmr leaf proof".to_string(),
+        ));
     }
 
     // verfiy block header
     if block_header.parent_hash != mmr_leaf.parent_number_and_hash.1.to_vec() {
-        return Err(Ics02Error::client_specific("header hash not match".to_string()))
+        return Err(Ics02Error::client_specific(
+            "header hash not match".to_string(),
+        ));
     }
 
     Ok(())

@@ -65,20 +65,20 @@ impl Header {
 }
 
 impl ibc::core::ics02_client::header::Header for Header {
-     /// The type of client (eg. Tendermint)
+    /// The type of client (eg. Tendermint)
     fn client_type(&self) -> ClientType {
-         todo!()
-     }
+        todo!()
+    }
 
     /// The height of the consensus state
     fn height(&self) -> Height {
         // todo(davirian): unwrap
         Height::new(0, self.block_header.block_number as u64).unwrap()
-     }
+    }
 
     /// The timestamp of the consensus state
     fn timestamp(&self) -> Timestamp {
-        self.timestamp.clone().into()
+        self.timestamp.into()
     }
 }
 
@@ -89,22 +89,22 @@ impl TryFrom<RawHeader> for Header {
 
     fn try_from(raw: RawHeader) -> Result<Self, Self::Error> {
         let ibc_proto::google::protobuf::Timestamp { seconds, nanos } = raw
-        .timestamp
-        .ok_or_else(|| Error::invalid_raw_header("missing timestamp".into()))?;
+            .timestamp
+            .ok_or_else(|| Error::invalid_raw_header("missing timestamp".into()))?;
 
-    let proto_timestamp = tpb::Timestamp { seconds, nanos };
-    let timestamp = proto_timestamp
-        .try_into()
-        .map_err(|e| Error::invalid_raw_header(format!("invalid timestamp: {}", e)))?;
+        let proto_timestamp = tpb::Timestamp { seconds, nanos };
+        let timestamp = proto_timestamp
+            .try_into()
+            .map_err(|e| Error::invalid_raw_header(format!("invalid timestamp: {}", e)))?;
 
-    Ok(Self {
-        block_header: raw
-            .block_header
-            .ok_or_else(Error::empty_block_header)?
-            .into(),
-        mmr_root: raw.mmr_root.ok_or_else(Error::empty_mmr_root)?.try_into()?,
-        timestamp: timestamp,
-    })
+        Ok(Self {
+            block_header: raw
+                .block_header
+                .ok_or_else(Error::empty_block_header)?
+                .into(),
+            mmr_root: raw.mmr_root.ok_or_else(Error::empty_mmr_root)?.try_into()?,
+            timestamp: timestamp,
+        })
     }
 }
 
@@ -149,7 +149,7 @@ impl From<Header> for Any {
         Any {
             type_url: GRANDPA_HEADER_TYPE_URL.to_string(),
             value: Protobuf::<RawHeader>::encode_vec(&header)
-            .expect("encoding to `Any` from `GpHeader`"),
+                .expect("encoding to `Any` from `GpHeader`"),
         }
     }
 }

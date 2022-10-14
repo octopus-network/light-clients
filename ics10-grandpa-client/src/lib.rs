@@ -1,6 +1,8 @@
 // Ensure we're `no_std` when compiling for Wasm.
 #![cfg_attr(not(feature = "std"), no_std)]
 #![allow(unused_imports)]
+#![allow(unused_variables)]
+#![allow(dead_code)]
 
 extern crate alloc;
 

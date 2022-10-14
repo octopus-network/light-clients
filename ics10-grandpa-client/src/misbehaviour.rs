@@ -7,7 +7,6 @@ use crate::header::Header;
 use ibc::core::ics24_host::identifier::ClientId;
 use ibc::Height;
 
-
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Misbehaviour {
     pub client_id: ClientId,
@@ -34,13 +33,13 @@ impl TryFrom<RawMisbehaviour> for Misbehaviour {
         Ok(Self {
             client_id: Default::default(),
             header1: raw
-            .header_1
-            .ok_or_else(|| Error::invalid_raw_misbehaviour("missing header1".into()))?
-            .try_into()?,
+                .header_1
+                .ok_or_else(|| Error::invalid_raw_misbehaviour("missing header1".into()))?
+                .try_into()?,
             header2: raw
-            .header_2
-            .ok_or_else(|| Error::invalid_raw_misbehaviour("missing header2".into()))?
-            .try_into()?,
+                .header_2
+                .ok_or_else(|| Error::invalid_raw_misbehaviour("missing header2".into()))?
+                .try_into()?,
         })
     }
 }
@@ -59,11 +58,11 @@ impl From<Misbehaviour> for RawMisbehaviour {
 impl core::fmt::Display for Misbehaviour {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> Result<(), core::fmt::Error> {
         write!(
-                f,
-        "{} h1: {} h2: {}",
-        self.client_id,
-        self.header1.height(),
-        self.header2.height(),
+            f,
+            "{} h1: {} h2: {}",
+            self.client_id,
+            self.header1.height(),
+            self.header2.height(),
         )
     }
 }

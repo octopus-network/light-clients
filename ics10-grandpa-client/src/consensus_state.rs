@@ -1,14 +1,14 @@
-use ibc_proto::google::protobuf::Any;
-use ibc_proto::ibc::lightclients::grandpa::v1::ConsensusState as RawConsensusState;
-use ibc_proto::protobuf::Protobuf;
-use serde::{Deserialize, Serialize};
+use super::client_state_help::Commitment;
 use crate::error::Error;
 use crate::header::Header;
 use ibc::core::ics02_client::client_type::ClientType;
 use ibc::core::ics02_client::error::Error as Ics02Error;
 use ibc::core::ics23_commitment::commitment::CommitmentRoot;
 use ibc::timestamp::Timestamp;
-use super::client_state_help::Commitment;
+use ibc_proto::google::protobuf::Any;
+use ibc_proto::ibc::lightclients::grandpa::v1::ConsensusState as RawConsensusState;
+use ibc_proto::protobuf::Protobuf;
+use serde::{Deserialize, Serialize};
 use tendermint::time::Time;
 use tendermint_proto::google::protobuf as tpb;
 
@@ -71,7 +71,7 @@ impl TryFrom<RawConsensusState> for ConsensusState {
             .ok_or_else(|| Error::invalid_raw_consensus_state("missing timestamp".into()))?;
 
         let proto_timestamp = tpb::Timestamp { seconds, nanos };
-        
+
         let timestamp = proto_timestamp
             .try_into()
             .map_err(|e| Error::invalid_raw_consensus_state(format!("invalid timestamp: {}", e)))?;
@@ -132,8 +132,8 @@ impl TryFrom<Any> for ConsensusState {
 
         fn decode_consensus_state<B: Buf>(buf: B) -> Result<ConsensusState, Error> {
             RawConsensusState::decode(buf)
-            .map_err(Error::decode)?
-            .try_into()
+                .map_err(Error::decode)?
+                .try_into()
         }
 
         match raw.type_url.as_str() {
@@ -151,7 +151,7 @@ impl From<ConsensusState> for Any {
         Any {
             type_url: GRANDPA_CONSENSUS_STATE_TYPE_URL.to_string(),
             value: Protobuf::<RawConsensusState>::encode_vec(&consensus_state)
-            .expect("encoding to `Any` from `TmConsensusState`"),
+                .expect("encoding to `Any` from `TmConsensusState`"),
         }
     }
 }
