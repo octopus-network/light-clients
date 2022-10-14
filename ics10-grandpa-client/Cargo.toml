@@ -6,8 +6,9 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+serde_json  = { version = "1", default-features = false}
 # ibc protocol crates
-ibc = { version = "0.19.0", default-features = false, git = "https://github.com/cosmos/ibc-rs.git"}
+ibc = { version = "0.19.0", default-features = false, git = "https://github.com/octopus-network/ibc-rs.git", branch = "feature/ics10-grandpa-client"}
 ibc-proto = { version = "0.20.1", default-features = false }
 serde = { version = "1.0", default-features = false }
 prost = { version = "0.11", default-features = false }
@@ -22,7 +23,10 @@ sp-std = { version = "4.0.0", git = "https://github.com/paritytech/substrate.git
 hash-db = { version = "0.15.2", default-features = false }
 beefy-light-client = { git = "https://github.com/octopus-network/beefy-light-client.git", branch = "main", default-features = false }
 beefy-merkle-tree = { git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.28", features = ["keccak"], default-features = false }
-
+sp-io = { version = "6.0.0", git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.28", default-features = false }
+sp-core = { version = "6.0.0", git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.28", default-features = false }
+frame-support = { version = "4.0.0-dev",git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.28", default-features = false }
+sp-runtime = { version = "6.0.0", git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.28", default-features = false }
 
 # just for dev tests
 [dev-dependencies]
@@ -32,6 +36,7 @@ sp-core = { version = "6.0.0", git = "https://github.com/paritytech/substrate.gi
 [features]
 default = ["std"]
 std = [
+    "serde_json/std",
     "ibc/std",
     "ibc-proto/std",
     "serde/std",
@@ -44,5 +49,9 @@ std = [
     "sp-std/std",
     "hash-db/std",
     "beefy-merkle-tree/std",
+    "sp-io/std",
+    "sp-core/std",
+    "frame-support/std",
+    "sp-runtime/std",
 ]
 
