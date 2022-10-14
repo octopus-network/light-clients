@@ -12,7 +12,7 @@ use ibc::timestamp::Timestamp;
 use ibc::utils::pretty::{PrettySignedHeader, PrettyValidatorSet};
 use ibc::Height;
 use ibc_proto::google::protobuf::Any;
-use ibc_proto::ibc::lightclients::tendermint::v1::Header as RawHeader;
+use ibc_proto::ibc::lightclients::grandpa::v1::Header as RawHeader;
 use ibc_proto::protobuf::Protobuf;
 use prost::Message;
 use serde_derive::{Deserialize, Serialize};
@@ -23,6 +23,8 @@ use super::client_state_help::MmrLeafProof;
 use super::client_state_help::MmrRoot;
 use super::client_state_help::SignedCommitment;
 use super::client_state_help::ValidatorMerkleProof;
+use tendermint::time::Time;
+use tendermint_proto::google::protobuf as tpb;
 
 pub const GRANDPA_HEADER_TYPE_URL: &str = "/ibc.lightclients.grandpa.v1.Header";
 
@@ -32,23 +34,24 @@ pub struct Header {
     pub block_header: BlockHeader,
     pub mmr_root: MmrRoot,
     //// timestamp
-    //    pub timestamp: Timestamp,
+    pub timestamp: Time,
 }
 impl Default for Header {
     fn default() -> Self {
         Self {
             block_header: BlockHeader::default(),
             mmr_root: MmrRoot::default(),
-            //            timestamp: Timestamp::from_unix_timestamp(0, 0).unwrap(),
+            // todo(davirian): detail with unwrap
+            timestamp: Time::from_unix_timestamp(0, 0).unwrap(),
         }
     }
 }
 impl Header {
-    pub fn new(block_header: BlockHeader, mmr_root: MmrRoot) -> Self {
+    pub fn new(block_header: BlockHeader, mmr_root: MmrRoot, timestamp: Time) -> Self {
         Self {
             block_header,
             mmr_root,
-            //            timestamp,
+            timestamp,
         }
     }
 
@@ -69,13 +72,14 @@ impl ibc::core::ics02_client::header::Header for Header {
 
     /// The height of the consensus state
     fn height(&self) -> Height {
-         todo!()
+        // todo(davirian): unwrap
+        Height::new(0, self.block_header.block_number as u64).unwrap()
      }
 
     /// The timestamp of the consensus state
     fn timestamp(&self) -> Timestamp {
-         todo!()
-     }
+        self.timestamp.clone().into()
+    }
 }
 
 impl Protobuf<RawHeader> for Header {}
@@ -84,7 +88,23 @@ impl TryFrom<RawHeader> for Header {
     type Error = Error;
 
     fn try_from(raw: RawHeader) -> Result<Self, Self::Error> {
-        todo!()
+        let ibc_proto::google::protobuf::Timestamp { seconds, nanos } = raw
+        .timestamp
+        .ok_or_else(|| Error::invalid_raw_header("missing timestamp".into()))?;
+
+    let proto_timestamp = tpb::Timestamp { seconds, nanos };
+    let timestamp = proto_timestamp
+        .try_into()
+        .map_err(|e| Error::invalid_raw_header(format!("invalid timestamp: {}", e)))?;
+
+    Ok(Self {
+        block_header: raw
+            .block_header
+            .ok_or_else(Error::empty_block_header)?
+            .into(),
+        mmr_root: raw.mmr_root.ok_or_else(Error::empty_mmr_root)?.try_into()?,
+        timestamp: timestamp,
+    })
     }
 }
 
@@ -94,7 +114,14 @@ pub fn decode_header<B: Buf>(buf: B) -> Result<Header, Error> {
 
 impl From<Header> for RawHeader {
     fn from(value: Header) -> Self {
-        todo!()
+        let tpb::Timestamp { seconds, nanos } = value.timestamp.into();
+        let timestamp = ibc_proto::google::protobuf::Timestamp { seconds, nanos };
+        let mmr_root = value.mmr_root.try_into().unwrap();
+        RawHeader {
+            block_header: Some(value.block_header.into()),
+            mmr_root: Some(mmr_root),
+            timestamp: Some(timestamp),
+        }
     }
 }
 

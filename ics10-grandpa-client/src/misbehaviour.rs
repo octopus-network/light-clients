@@ -1,4 +1,4 @@
-use ibc_proto::ibc::lightclients::tendermint::v1::Misbehaviour as RawMisbehaviour;
+use ibc_proto::ibc::lightclients::grandpa::v1::Misbehaviour as RawMisbehaviour;
 use ibc_proto::protobuf::Protobuf;
 use serde::{Deserialize, Serialize};
 
@@ -48,7 +48,8 @@ impl TryFrom<RawMisbehaviour> for Misbehaviour {
 impl From<Misbehaviour> for RawMisbehaviour {
     fn from(value: Misbehaviour) -> Self {
         RawMisbehaviour {
-            client_id: value.client_id.to_string(),
+            // todo(davirian)
+            client_id: 0,
             header_1: Some(value.header1.into()),
             header_2: Some(value.header2.into()),
         }

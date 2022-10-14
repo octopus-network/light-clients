@@ -28,6 +28,14 @@ sp-core = { version = "6.0.0", git = "https://github.com/paritytech/substrate.gi
 frame-support = { version = "4.0.0-dev",git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.28", default-features = false }
 sp-runtime = { version = "6.0.0", git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.28", default-features = false }
 
+# temndermint crates for time 
+[dependencies.tendermint]
+version = "=0.25.0"
+default-features = false
+[dependencies.tendermint-proto]
+version = "=0.25.0"
+default-features = false
+
 # just for dev tests
 [dev-dependencies]
 sp-runtime = { version = "6.0.0", git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.28"}
@@ -53,5 +61,6 @@ std = [
     "sp-core/std",
     "frame-support/std",
     "sp-runtime/std",
+    "tendermint/std",
 ]
 
