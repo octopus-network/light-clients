@@ -1,7 +1,6 @@
 [workspace]
 members =  [
     "ics10-grandpa-client",
-    "icsx-near-client",
 ]
 
 [patch.crates-io]
