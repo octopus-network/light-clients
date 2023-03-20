@@ -1,13 +1,9 @@
 // Ensure we're `no_std` when compiling for Wasm.
 #![cfg_attr(not(feature = "std"), no_std)]
-#![allow(unused_imports)]
-#![allow(unused_variables)]
-#![allow(dead_code)]
 
 extern crate alloc;
 
 pub mod client_state;
-pub mod client_state_help;
 pub mod consensus_state;
 pub mod error;
 pub mod header;

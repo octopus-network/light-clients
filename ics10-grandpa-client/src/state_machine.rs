@@ -1,4 +1,3 @@
-use alloc::vec;
 use alloc::vec::Vec;
 use codec::Codec;
 use hash_db::{HashDB, Hasher, EMPTY_PREFIX};
@@ -38,7 +37,7 @@ where
 
 #[test]
 fn create_proof_check_backend_works() {
-    use codec::{Decode, Encode};
+    use codec::Decode;
     use sp_runtime::traits::BlakeTwo256;
 
     let key: Vec<u8> = vec![
