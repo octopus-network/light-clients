@@ -1,5 +1,5 @@
 [package]
-name = "ics10-grandpa-light-client"
+name = "ics10-grandpa-client"
 version = "0.1.0"
 edition = "2021"
 
